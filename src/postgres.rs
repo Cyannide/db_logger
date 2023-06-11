@@ -25,7 +25,7 @@ use sqlx::postgres::{PgConnectOptions, PgPool};
 use sqlx::Row;
 use std::convert::TryFrom;
 use std::env;
-use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::atomic::{AtomicI64, Ordering};
 use std::sync::Arc;
 use time::OffsetDateTime;
 
@@ -144,7 +144,7 @@ pub async fn setup_test(opts: ConnectionOptions) -> Connection {
 struct PostgresDb {
     pool: PgPool,
     suffix: Option<u32>,
-    log_sequence: Arc<AtomicU32>,
+    log_sequence: Arc<AtomicI64>,
 }
 
 impl PostgresDb {
@@ -160,7 +160,7 @@ impl PostgresDb {
         Self {
             pool: PgPool::connect_lazy_with(options),
             suffix,
-            log_sequence: Arc::from(AtomicU32::new(0)),
+            log_sequence: Arc::from(AtomicI64::new(0)),
         }
     }
 
@@ -215,7 +215,7 @@ impl Db for PostgresDb {
     }
 
     async fn put_log_entries(&self, entries: Vec<LogEntry>) -> Result<()> {
-        let nentries = u32::try_from(entries.len())
+        let nentries = i64::try_from(entries.len())
             .map_err(|e| format!("Cannot insert {} log entries at once: {}", entries.len(), e))?;
         if nentries == 0 {
             return Ok(());
@@ -272,7 +272,7 @@ impl Db for PostgresDb {
         }
 
         let done = query.execute(&self.pool).await.map_err(|e| e.to_string())?;
-        if done.rows_affected() != u64::from(nentries) {
+        if done.rows_affected() != u64::try_from(nentries).unwrap() {
             return Err(format!(
                 "Log entries insertion created {} rows but expected {}",
                 done.rows_affected(),

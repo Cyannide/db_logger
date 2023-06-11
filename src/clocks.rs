@@ -40,7 +40,7 @@ impl Clock for SystemClock {
         // then we would get some strange behavior throughout the program.  Better be consistent.
         let nanos = nanos / 1000 * 1000;
 
-        OffsetDateTime::from_unix_timestamp_nanos(nanos)
+        OffsetDateTime::from_unix_timestamp_nanos(nanos).expect("unable to create OffsetDateTime from nanos")
     }
 }
 
@@ -62,7 +62,7 @@ impl MonotonicClock {
 impl Clock for MonotonicClock {
     fn now_utc(&self) -> OffsetDateTime {
         let now = self.now.fetch_add(1, Ordering::SeqCst);
-        OffsetDateTime::from_unix_timestamp(i64::try_from(now).expect("Mock timestamp too long"))
+        OffsetDateTime::from_unix_timestamp(i64::try_from(now).expect("Mock timestamp too long")).expect("unable to create OffsetDateTime from nanos")
     }
 }
 
@@ -90,8 +90,8 @@ mod tests {
     #[test]
     fn test_monotonicclock() {
         let clock = MonotonicClock::new(123);
-        assert_eq!(OffsetDateTime::from_unix_timestamp(123), clock.now_utc());
-        assert_eq!(OffsetDateTime::from_unix_timestamp(124), clock.now_utc());
-        assert_eq!(OffsetDateTime::from_unix_timestamp(125), clock.now_utc());
+        assert_eq!(OffsetDateTime::from_unix_timestamp(123).expect("unable to create OffsetDateTime from nanos"), clock.now_utc());
+        assert_eq!(OffsetDateTime::from_unix_timestamp(124).expect("unable to create OffsetDateTime from nanos"), clock.now_utc());
+        assert_eq!(OffsetDateTime::from_unix_timestamp(125).expect("unable to create OffsetDateTime from nanos"), clock.now_utc());
     }
 }

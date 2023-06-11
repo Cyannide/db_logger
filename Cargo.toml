@@ -8,7 +8,7 @@ keywords = ["database", "logging"]
 description = "A database-backed logger for use with the log crate"
 repository = "https://github.com/jmmv/db_logger"
 readme = "README.md"
-edition = "2018"
+edition = "2021"
 
 [features]
 default = ["postgres", "sqlite"]
@@ -19,11 +19,11 @@ sqlite = ["sqlx/sqlite"]
 async-trait = "0.1"
 futures = "0.3"
 gethostname = "0.2"
-log = "0.4"
+log = { version = "0.4", features = ["std"] }
 rand = "0.8"
-sqlx = { version = "0.5", features = ["runtime-async-std-rustls", "time"] }
-time = "0.2.16"
-tokio = "1"
+sqlx = { version = "0.6.3", features = [ "runtime-tokio-rustls", "time" ] }
+time = "0.3"
+tokio = { version = "1", features = ["macros", "rt", "rt-multi-thread", "sync", "time"] }
 
 [dev-dependencies]
 env_logger = "0.8"
