@@ -129,7 +129,7 @@ impl Db for SqliteDb {
         Ok(entries)
     }
 
-    async fn put_log_entries(&self, entries: Vec<LogEntry<'_, '_>>) -> Result<()> {
+    async fn put_log_entries(&self, entries: Vec<LogEntry>) -> Result<()> {
         let nentries = u64::try_from(entries.len())
             .map_err(|e| format!("Cannot insert {} log entries at once: {}", entries.len(), e))?;
         if nentries == 0 {

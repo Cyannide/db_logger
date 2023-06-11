@@ -55,18 +55,15 @@ pub(crate) const LOG_ENTRY_MAX_MESSAGE_LENGTH: usize = 4096;
 
 /// Contents of a log entry.
 #[derive(Debug)]
-pub(crate) struct LogEntry<'a, 'b> {
+pub(crate) struct LogEntry {
     pub(crate) timestamp: OffsetDateTime,
     pub(crate) hostname: String,
     pub(crate) level: Level,
-    pub(crate) module: Option<&'a str>,
-    pub(crate) filename: Option<&'b str>,
+    pub(crate) module: Option<String>,
+    pub(crate) filename: Option<String>,
     pub(crate) line: Option<u32>,
     pub(crate) message: String,
 }
-
-/// A `LogEntry` with static lifetimes.
-type StaticLogEntry = LogEntry<'static, 'static>;
 
 #[derive(Debug)]
 /// Types of requests that can be sent to the `recorder` background task.
@@ -78,11 +75,11 @@ enum Action {
     Flush,
 
     /// Asks the recorder to persist the provided log entry.
-    Record(StaticLogEntry),
+    Record(LogEntry),
 }
 
 /// Writes all `entries` to the `db` in a single transaction.
-async fn write_all(db: Arc<dyn Db + Send + Sync + 'static>, entries: Vec<StaticLogEntry>) {
+async fn write_all(db: Arc<dyn Db + Send + Sync + 'static>, entries: Vec<LogEntry>) {
     if let Err(e) = db.put_log_entries(entries).await {
         eprintln!("Failed to write log entries: {}", e);
     }
@@ -170,7 +167,7 @@ async fn recorder(
 fn is_recorder_log(record: &Record) -> bool {
     // TODO(jmmv): Instead of blacklisting these modules, we should try to use tokio::task_local
     // to avoid log statements triggered by us.
-    let module = match record.module_path_static() {
+    let module = match record.module_path() {
         Some(module) => module,
         None => return true,
     };
@@ -279,24 +276,25 @@ impl Log for DbLogger {
         // Skip logs emitted by the database-persistence code as they would cause us to recurse and
         // never finish logging.
         if is_recorder_log(record) {
-            eprintln!(
-                "Non-persisted log entry: {:?} {} {:?} {:?}:{:?} {}",
-                now,
-                record.level(),
-                record.module_path_static(),
-                record.file_static(),
-                record.line(),
-                record.args(),
-            );
+            if record.level() <= Level::Warn {
+                eprintln!(
+                    "Non-persisted log entry: {:?} {} {:?} {:?}:{:?} {}",
+                    now,
+                    record.level(),
+                    record.module_path_static(),
+                    record.file_static(),
+                    record.line(),
+                    record.args(),
+                );
+            }
             return;
         }
-
-        let entry = StaticLogEntry {
+        let entry = LogEntry {
             timestamp: now,
             hostname: self.hostname.clone(),
             level: record.level(),
-            module: record.module_path_static(),
-            filename: record.file_static(),
+            module: Some(record.module_path().unwrap_or("").to_owned()),
+            filename: Some(record.file().unwrap_or("").to_owned()),
             line: record.line(),
             message: format!("{}", record.args()),
         };

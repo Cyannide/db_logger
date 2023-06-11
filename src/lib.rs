@@ -72,14 +72,13 @@ pub(crate) trait Db {
     ///
     /// This takes a `Vec` instead of a slice for efficiency, as the writes may have to truncate the
     /// entries.
-    async fn put_log_entries(&self, entries: Vec<LogEntry<'_, '_>>) -> Result<()>;
+    async fn put_log_entries(&self, entries: Vec<LogEntry>) -> Result<()>;
 }
 
 /// Fits the string in `input` within the specified `max_len`.
-fn truncate_option_str(input: Option<&str>, max_len: usize) -> Option<String> {
+fn truncate_option_str(input: Option<String>, max_len: usize) -> Option<String> {
     match input {
-        Some(s) => {
-            let mut s = s.to_owned();
+        Some(mut s) => {
             s.truncate(max_len);
             Some(s)
         }
