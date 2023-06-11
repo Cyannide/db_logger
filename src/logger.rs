@@ -218,6 +218,13 @@ impl Handle {
     pub async fn get_log_entries(&self) -> Result<Vec<String>> {
         self.db.0.get_log_entries().await
     }
+
+    /// Flushes pending records to the backend DB
+    pub fn flush(&self) {
+        let done_rx = self.done_rx.lock().unwrap();
+        self.action_tx.send(Action::Flush).unwrap();
+        done_rx.recv().unwrap();
+    }
 }
 
 impl Drop for Handle {
