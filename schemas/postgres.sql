@@ -20,17 +20,17 @@ CREATE TABLE logs (
     -- wraps around.  Needed to disambiguate log messages when the timestamps do not have sufficient
     -- granularity.
     -- TODO(jmmv): A SMALLSERIAL would be sufficient, but sqlx 0.5 doesn't support them.
-    sequence SERIAL NOT NULL,
+    sequence BIGSERIAL NOT NULL,
 
-    hostname VARCHAR(64) NOT NULL,
+    hostname TEXT NOT NULL,
 
     level SMALLINT NOT NULL,
 
-    module VARCHAR(64),
-    filename VARCHAR(256),
+    module TEXT,
+    filename TEXT,
     line SMALLINT,
 
-    message VARCHAR(1024) NOT NULL,
+    message TEXT NOT NULL,
 
     PRIMARY KEY (timestamp, sequence, hostname)
 );

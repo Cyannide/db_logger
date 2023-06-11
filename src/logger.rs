@@ -51,7 +51,7 @@ const DEFAULT_LOG_LEVEL: Level = Level::Warn;
 pub(crate) const LOG_ENTRY_MAX_HOSTNAME_LENGTH: usize = 64;
 pub(crate) const LOG_ENTRY_MAX_MODULE_LENGTH: usize = 64;
 pub(crate) const LOG_ENTRY_MAX_FILENAME_LENGTH: usize = 256;
-pub(crate) const LOG_ENTRY_MAX_MESSAGE_LENGTH: usize = 1024;
+pub(crate) const LOG_ENTRY_MAX_MESSAGE_LENGTH: usize = 4096;
 
 /// Contents of a log entry.
 #[derive(Debug)]
