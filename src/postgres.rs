@@ -181,7 +181,7 @@ impl Db for PostgresDb {
 
         let mut tx = self.pool.begin().await.map_err(|e| e.to_string())?;
         for query_str in schema.split(';') {
-            sqlx::query(query_str).execute(&mut tx).await.map_err(|e| e.to_string())?;
+            sqlx::query(query_str).execute(&mut *tx).await.map_err(|e| e.to_string())?;
         }
         tx.commit().await.map_err(|e| e.to_string())
     }
@@ -319,7 +319,7 @@ impl PostgresTestDb {
             format!("DROP INDEX logs_{}_by_timestamp", suffix),
             format!("DROP TABLE logs_{}", suffix),
         ] {
-            sqlx::query(query_str).execute(&mut tx).await.unwrap();
+            sqlx::query(query_str).execute(&mut *tx).await.unwrap();
         }
         tx.commit().await.unwrap();
 
