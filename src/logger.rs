@@ -221,7 +221,10 @@ impl Handle {
 
     /// Flushes pending records to the backend DB
     pub fn flush(&self) {
-        let done_rx = self.done_rx.lock().unwrap();
+        let Ok(done_rx) = self.done_rx.lock() else {
+            println!("Unable to grab lock for done_rx");
+            return;
+        };
         self.action_tx.send(Action::Flush).unwrap();
         done_rx.recv().unwrap();
     }
@@ -309,7 +312,10 @@ impl Log for DbLogger {
     }
 
     fn flush(&self) {
-        let done_rx = self.done_rx.lock().unwrap();
+        let Ok(done_rx) = self.done_rx.lock() else {
+            println!("Unable to grab lock for done_rx");
+            return;
+        };
         self.action_tx.send(Action::Flush).unwrap();
         done_rx.recv().unwrap();
     }
