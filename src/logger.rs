@@ -171,11 +171,12 @@ fn is_recorder_log(record: &Record) -> bool {
         Some(module) => module,
         None => return true,
     };
-    (module.starts_with("rustls::") || module.starts_with("sqlx::"))
+    (module.starts_with("rustls::") || module.starts_with("sqlx::") || module.starts_with("quinn::connection"))
         || (record.level() >= Level::Trace
             && (module.starts_with("async_io::")
                 || module.starts_with("async_std::")
-                || module.starts_with("polling")))
+                || module.starts_with("polling")
+                || module.starts_with("quinn")))
 }
 
 /// Fetches the value of `RUST_LOG` or returns a default value if not available.
