@@ -18,10 +18,10 @@ sqlite = ["sqlx/sqlite"]
 [dependencies]
 async-trait = "0.1"
 futures = "0.3"
-gethostname = "0.5"
+gethostname = "1.1"
 log = { version = "0.4", features = ["std"] }
-rand = "0.8"
-sqlx = { version = "0.8.2", features = [ "runtime-tokio-rustls", "time" ] }
+rand = "0.9"
+sqlx = { version = "0.8.6", features = [ "runtime-tokio-rustls", "time" ] }
 time = "0.3"
 tokio = { version = "1", features = ["macros", "rt", "rt-multi-thread", "sync", "time"] }
 
